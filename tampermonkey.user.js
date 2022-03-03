@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         YouTubeLiveミッドロール広告自動挿入
 // @namespace    http://tampermonkey.net/
-// @version      0.1
+// @version      0.1.1
 // @description  ミッドロール広告を挿入したいライブ配信画面のタブを開きっぱなしにしておけば、定期的に広告挿入ボタンがクリックされます
 // @author       You
 // @match        https://studio.youtube.com/video/*/livestreaming
