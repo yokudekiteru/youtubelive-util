@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         YouTubeLiveユーティリティ
 // @namespace    http://tampermonkey.net/
-// @version      0.4
+// @version      0.4.1
 // @description  YouTubeStudioでのライブ配信を補助するツール
 // @author       You
 // @match        https://studio.youtube.com/video/*/livestreaming*
@@ -201,6 +201,7 @@
 <option value="15" selected>15分</option>
 <option value="10">10分</option>
 <option value="5">5分</option>
+<option value="3">3分</option>
 </select>
 　前回: <span id="${insertAdLastExecDatetimeId}">未実行</span>
 　次回: <span id="${insertAdNextExecDatetimeId}">未実行</span>
