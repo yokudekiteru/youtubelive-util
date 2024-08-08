@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         YouTubeLiveユーティリティ
 // @namespace    http://tampermonkey.net/
-// @version      0.4.1
+// @version      0.4.2
 // @description  YouTubeStudioでのライブ配信を補助するツール
 // @author       You
 // @match        https://studio.youtube.com/video/*/livestreaming*
@@ -154,62 +154,71 @@
   const initMe = function() {
     let now = new Date();
     const nowOnAir = document.getElementById(startStreamButtonId).ariaDisabled === 'true';
-    const displayInsertAdEl = document.createElement('span');
-    displayInsertAdEl.innerHTML = `自動広告 起点: <span id="${insertAdBaseDatetimeId}">--</span>
-&nbsp;初回:<select id="${insertAdSwitchId}">
-<option value="90">90分後</option>
-<option value="85">85分後</option>
-<option value="70">70分後</option>
-<option value="65">65分後</option>
-<option value="60" selected>60分後</option>
-<option value="55">55分後</option>
-<option value="50">50分後</option>
-<option value="45">45分後</option>
-<option value="40">40分後</option>
-<option value="35">35分後</option>
-<option value="30">30分後</option>
-<option value="25">25分後</option>
-<option value="20">20分後</option>
-<option value="15">15分後</option>
-<option value="10">10分後</option>
-<option value="5">5分後</option>
-<option value="1">1分後</option>
-<option value="-1">off</option>
-</select>
-<br />
-<span id="${insertAdExecMonitorId}" style="font-size: 0.8em;">
-実行間隔:<select id="${insertAdIntervalMinutesId}">
-<option value="120">120分</option>
-<option value="115">115分</option>
-<option value="110">110分</option>
-<option value="105">105分</option>
-<option value="100">100分</option>
-<option value="95">95分</option>
-<option value="90">90分</option>
-<option value="85">85分</option>
-<option value="70">70分</option>
-<option value="65">65分</option>
-<option value="60">60分</option>
-<option value="55">55分</option>
-<option value="50">50分</option>
-<option value="45">45分</option>
-<option value="40">40分</option>
-<option value="35">35分</option>
-<option value="30">30分</option>
-<option value="25">25分</option>
-<option value="20">20分</option>
-<option value="15" selected>15分</option>
-<option value="10">10分</option>
-<option value="5">5分</option>
-<option value="3">3分</option>
-</select>
-　前回: <span id="${insertAdLastExecDatetimeId}">未実行</span>
-　次回: <span id="${insertAdNextExecDatetimeId}">未実行</span>
-</span>`;
-    displayInsertAdEl.style.fontSize = '1.5em';
-    displayInsertAdEl.style.fontWeight = 'bold';
-    displayInsertAdEl.style.color = 'yellow';
-    document.querySelector('.ytls-header.action-buttons').prepend(displayInsertAdEl);
+    const insertAdEl = document.createElement('span');
+    insertAdEl.style.fontSize = '1.5em';
+    insertAdEl.style.fontWeight = 'bold';
+    insertAdEl.style.color = 'yellow';
+    insertAdEl.append('自動広告 起点: ');
+    const insertAdBaseDatetimeEl = document.createElement('span');
+    insertAdBaseDatetimeEl.id = insertAdBaseDatetimeId;
+    insertAdBaseDatetimeEl.innerText = '--';
+    insertAdEl.append(insertAdBaseDatetimeEl);
+    insertAdEl.append(' 初回:');
+    const insertAdSwitchEl = document.createElement('select');
+    insertAdSwitchEl.id = insertAdSwitchId;
+    const adSwithOpt = {};
+    adSwithOpt[-1] = 'off';
+    adSwithOpt[1] = '1分後';
+    for (let i = 5; i <= 90; i = i + 5) {
+      adSwithOpt[i] = i + '分後';
+    }
+    Object.keys(adSwithOpt).forEach(function(k) {
+      const opt = document.createElement('option');
+      opt.value = k;
+      opt.innerText = adSwithOpt[k];
+      if (k == 60) {
+        opt.selected = 'selected';
+      }
+      insertAdSwitchEl.append(opt);
+    });
+    insertAdEl.append(insertAdSwitchEl);
+    insertAdEl.append(document.createElement('br'));
+
+    const insertAdExecMonitorEl = document.createElement('span');
+    insertAdExecMonitorEl.id = insertAdExecMonitorId;
+    insertAdExecMonitorEl.style.fontSize = '0.8em';
+    insertAdExecMonitorEl.append('実行間隔:');
+
+    const insertAdIntervalMinutesEl = document.createElement('select');
+    insertAdIntervalMinutesEl.id = insertAdIntervalMinutesId;
+    const intervalMinutesOpt = {};
+    intervalMinutesOpt[3] = '3分';
+    for (let i = 5; i <= 120; i = i + 5) {
+      intervalMinutesOpt[i] = i + '分';
+    }
+    Object.keys(intervalMinutesOpt).forEach(function(k) {
+      const opt = document.createElement('option');
+      opt.value = k;
+      opt.innerText = intervalMinutesOpt[k];
+      if (k == 15) {
+        opt.selected = 'selected';
+      }
+      insertAdIntervalMinutesEl.append(opt);
+    });
+    insertAdExecMonitorEl.append(insertAdIntervalMinutesEl);
+    insertAdEl.append(insertAdExecMonitorEl);
+    insertAdEl.append('　前回: ');
+    const insertAdLastExecDatetimeEl = document.createElement('span');
+    insertAdLastExecDatetimeEl.id = insertAdLastExecDatetimeId;
+    insertAdLastExecDatetimeEl.innerText = '未実行';
+    insertAdEl.append(insertAdLastExecDatetimeEl);
+    insertAdEl.append('　次回: ');
+    const insertAdNextExecDatetimeEl = document.createElement('span');
+    insertAdNextExecDatetimeEl.id = insertAdNextExecDatetimeId;
+    insertAdNextExecDatetimeEl.innerText = '未実行';
+    insertAdEl.append(insertAdNextExecDatetimeEl);
+
+    document.querySelector('.ytls-header.action-buttons').prepend(insertAdEl);
     if (nowOnAir) {
       document.getElementById(insertAdBaseDatetimeId).innerText = now.toLocaleString();
     }
@@ -217,15 +226,45 @@
     document.getElementById(insertAdIntervalMinutesId).addEventListener('change', scheduleNextInsertAd);
     scheduleNextInsertAd();
 
-    const displayStreamTimerEl = document.createElement('span');
-    displayStreamTimerEl.innerHTML = `<span id="${streamTimerMonitorId}" style="font-size: 0.8em;">
-&nbsp;開始: <input type="date" id="${startStreamDateId}"><input type="time" id="${startStreamTimeId}"><button type="button" id="${startStreamReserveButtonId}">予約</button><br />
-&nbsp;終了: <input type="date" id="${endStreamDateId}"><input type="time" id="${endStreamTimeId}"><button type="button" id="${endStreamReserveButtonId}">予約</button>
-</span>`;
-    displayStreamTimerEl.style.fontSize = '1.5em';
-    displayStreamTimerEl.style.fontWeight = 'bold';
-    displayStreamTimerEl.style.color = 'yellow';
-    document.querySelector('.ytls-header.action-buttons').append(displayStreamTimerEl);
+    const streamTimerEl = document.createElement('span');
+    streamTimerEl.style.fontSize = '1.5em';
+    streamTimerEl.style.fontWeight = 'bold';
+    streamTimerEl.style.color = 'yellow';
+    const streamTimerMonitorEl = document.createElement('span');
+    streamTimerMonitorEl.id = streamTimerMonitorId;
+    streamTimerMonitorEl.style.fontSize = '0.8em';
+    // 開始予約コントロール
+    streamTimerMonitorEl.append(' 開始: ');
+    const startStreamDateEl = document.createElement('input');
+    startStreamDateEl.id = startStreamDateId;
+    startStreamDateEl.type = 'date';
+    streamTimerMonitorEl.append(startStreamDateEl);
+    const startStreamTimeEl = document.createElement('input');
+    startStreamTimeEl.id = startStreamTimeId;
+    startStreamTimeEl.type = 'time';
+    streamTimerMonitorEl.append(startStreamTimeEl);
+    const startStreamReserveButtonEl = document.createElement('button');
+    startStreamReserveButtonEl.id = startStreamReserveButtonId;
+    startStreamReserveButtonEl.innerText = '予約';
+    streamTimerMonitorEl.append(startStreamReserveButtonEl);
+    streamTimerMonitorEl.append(document.createElement('br'));
+    // 終了予約コントロール
+    streamTimerMonitorEl.append(' 終了: ');
+    const endStreamDateEl = document.createElement('input');
+    endStreamDateEl.id = endStreamDateId;
+    endStreamDateEl.type = 'date';
+    streamTimerMonitorEl.append(endStreamDateEl);
+    const endStreamTimeEl = document.createElement('input');
+    endStreamTimeEl.id = endStreamTimeId;
+    endStreamTimeEl.type = 'time';
+    streamTimerMonitorEl.append(endStreamTimeEl);
+    const endStreamReserveButtonEl = document.createElement('button');
+    endStreamReserveButtonEl.id = endStreamReserveButtonId;
+    endStreamReserveButtonEl.innerText = '予約';
+    streamTimerMonitorEl.append(endStreamReserveButtonEl);
+    streamTimerEl.append(streamTimerMonitorEl);
+
+    document.querySelector('.ytls-header.action-buttons').append(streamTimerEl);
     let defaultYmd = now.getFullYear() + '-' + ('0' + (now.getMonth() + 1)).slice(-2) + '-' + ('0' + (now.getDate())).slice(-2);
     let defaultHm = now.toLocaleTimeString().substring(0, 5);
     document.getElementById(startStreamDateId).value = defaultYmd;
