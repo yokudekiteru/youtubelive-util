@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         YouTubeLiveユーティリティ
 // @namespace    http://tampermonkey.net/
-// @version      0.4.2
+// @version      0.4.3
 // @description  YouTubeStudioでのライブ配信を補助するツール
 // @author       You
 // @match        https://studio.youtube.com/video/*/livestreaming*
@@ -121,15 +121,22 @@
     }, delay);
   }
 
+  const callbackOnStartStream = function() {
+      console.log('広告自動挿入開始');
+      document.getElementById(insertAdBaseDatetimeId).innerText = new Date().toLocaleString();
+      scheduleNextInsertAd();
+
+      setTimeout(function() {
+        // 本人確認ダイアログが残っていれば突破
+        const identityVerificationButton = document.querySelector('.ytcp-dialog button[aria-label="次へ"]');
+        if (identityVerificationButton !== null) {
+          identityVerificationButton.click();
+        }
+      }, 10 * 1000);
+  }
+
   const scheduleStartStream = function() {
-    let newTimeoutId = scheduleStream(
-      '開始', startStreamDateId, startStreamTimeId, startStreamReserveButtonId, startStreamButtonId,
-      function() {
-        // 広告自動挿入の基準日時を設定し、広告自動挿入を起動
-        document.getElementById(insertAdBaseDatetimeId).innerText = new Date().toLocaleString();
-        scheduleNextInsertAd();
-      }
-    );
+    let newTimeoutId = scheduleStream('開始', startStreamDateId, startStreamTimeId, startStreamReserveButtonId, startStreamButtonId, callbackOnStartStream);
     if (startStreamTimeoutId !== null) {
       clearTimeout(startStreamTimeoutId);
     }
@@ -274,11 +281,7 @@
     document.getElementById(startStreamReserveButtonId).addEventListener('click', scheduleStartStream);
     document.getElementById(endStreamReserveButtonId).addEventListener('click', scheduleEndStream);
     if (!nowOnAir) {
-      document.getElementById(startStreamButtonId).addEventListener('click', function() {
-        // LIVE配信開始を直押しした場合にも広告自動挿入を起動する
-        document.getElementById(insertAdBaseDatetimeId).innerText = new Date().toLocaleString();
-        scheduleNextInsertAd();
-      });
+      document.getElementById(startStreamButtonId).addEventListener('click', callbackOnStartStream);
     }
   }
 
